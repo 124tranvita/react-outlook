@@ -14,11 +14,11 @@ const event = {
     content: "Does noon work for you?",
   },
   start: {
-    dateTime: "2023-12-11T12:00:00",
+    dateTime: "2023-12-11T19:00:00",
     timeZone: "Pacific Standard Time",
   },
   end: {
-    dateTime: "2023-12-11T14:00:00",
+    dateTime: "2023-12-11T21:00:00",
     timeZone: "Pacific Standard Time",
   },
   location: {
@@ -57,6 +57,7 @@ const AddCelendarEvent: FC = () => {
   });
 
   const handleSubmit = useCallback(() => {
+    alert(JSON.stringify(event));
     instance
       .acquireTokenSilent(accessTokenRequest)
       .then((accessTokenResponse) => {
