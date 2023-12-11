@@ -5,8 +5,8 @@ import AddCelendarEvent from "./add-event";
 const OutlookCalendar: FC = () => {
   return (
     <>
-      <GetCalendarEvent />
       <AddCelendarEvent />
+      <GetCalendarEvent />
     </>
   );
 };

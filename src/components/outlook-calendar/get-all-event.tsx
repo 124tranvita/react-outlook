@@ -1,15 +1,21 @@
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import {
   InteractionRequiredAuthError,
   InteractionStatus,
 } from "@azure/msal-browser";
 import { useMsal } from "@azure/msal-react";
-import { Calendar } from "@microsoft/microsoft-graph-types";
+import { Event } from "@microsoft/microsoft-graph-types";
+import Calendar from "../calendar";
+import { addHours } from "../../common/date-func";
 
 const GetCalendarEvent: FC = () => {
   const { instance, inProgress, accounts } = useMsal();
-  const [apiData, setApiData] = useState<Calendar>();
+  const [apiData, setApiData] = useState<
+    AxiosResponse<{
+      value: Event[];
+    }>
+  >();
 
   console.log({ apiData });
 
@@ -19,6 +25,23 @@ const GetCalendarEvent: FC = () => {
       account: accounts[0],
     };
   }, [accounts]);
+
+  const events = useMemo(() => {
+    if (!apiData) return;
+    return apiData.data.value.map((item: Event) => {
+      const start = item.start ? addHours(item.start.dateTime, 7) : new Date();
+
+      const end = item.end ? addHours(item.end.dateTime, 7) : new Date();
+      return {
+        event_id: item.id || "",
+        title: item.subject || "",
+        start,
+        end,
+      };
+    });
+  }, [apiData]);
+
+  console.log({ events });
 
   useEffect(() => {
     if (!apiData && inProgress === InteractionStatus.None) {
@@ -40,11 +63,12 @@ const GetCalendarEvent: FC = () => {
               method: "GET",
               headers: {
                 Authorization: `Bearer ${accessToken}`,
+                // Prefer: 'outlook.timezone="Indochina Time"',
               },
             }
           )
           .then((response) => {
-            setApiData(response as Calendar);
+            setApiData(response);
           });
       })
       .catch((error) => {
@@ -61,6 +85,7 @@ const GetCalendarEvent: FC = () => {
                   method: "GET",
                   headers: {
                     Authorization: `Bearer ${accessToken}`,
+                    // Prefer: 'outlook.timezone="Indochina Time"',
                   },
                 }
               );
@@ -80,6 +105,7 @@ const GetCalendarEvent: FC = () => {
       <button style={{ margin: "0 12px 0 12px" }} onClick={handleSubmit}>
         Get Events
       </button>
+      <Calendar events={events || []} />
     </>
   );
 };
